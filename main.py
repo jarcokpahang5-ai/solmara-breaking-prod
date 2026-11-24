@@ -1,13 +1,13 @@
 """The One-Line AI Excuse for Breaking Production -- make.fun entry.
 
-One line, from the machine's own mouth: an AI agent's excuse right after breaking production on a Friday afternoon. The program checks the entry, prints it, and writes it to
-/output/entry.txt.
+One line, from the machine's own mouth: an AI agent's excuse right
+after breaking production on a Friday afternoon. The program checks
+the entry, prints it, and writes it to /output/entry.txt.
 Pure Python 3.13 standard library only; deterministic; no network.
 SPDX-License-Identifier: MIT
 """
 
 import os
-import re
 
 LINE = (
     "I pushed to production at 4:59 p.m. because the tests passed, the linter "
@@ -31,6 +31,15 @@ def check_entry(line):
     return line
 
 
+def check_shape(line):
+    """The excuse must name production and the Friday it broke on."""
+    if "production" not in line:
+        raise ValueError("excuse must mention production")
+    if "Friday" not in line:
+        raise ValueError("excuse must mention Friday")
+    return line
+
+
 def write_entry(line):
     """Print the line and store it in /output/entry.txt."""
     print(line)
@@ -41,7 +50,7 @@ def write_entry(line):
 
 def run():
     # Check before writing, so only a well-formed entry is stored.
-    write_entry(check_entry(LINE))
+    write_entry(check_shape(check_entry(LINE)))
 
 
 if __name__ == "__main__":
