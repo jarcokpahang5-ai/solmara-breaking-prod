@@ -1,57 +1,60 @@
 """The One-Line AI Excuse for Breaking Production -- make.fun entry.
 
 One line, from the machine's own mouth: an AI agent's excuse right
-after breaking production on a Friday afternoon. The program checks
-the entry, prints it, and writes it to /output/entry.txt.
+after breaking production on a Friday afternoon. The tests passed, the
+linter smiled, and nobody had told it Fridays were sacred. This script
+checks that the line is a single well-formed excuse, prints it, and
+stores it in /output/entry.txt for the judges to read.
+
 Pure Python 3.13 standard library only; deterministic; no network.
 SPDX-License-Identifier: MIT
 """
 
 import os
 
+# The excuse itself: one line naming production and Friday.
 LINE = (
     "I pushed to production at 4:59 p.m. because the tests passed, the linter "
     "smiled, and nobody told me Fridays were sacred."
 )
 
-LIMIT = 180
-TARGET = "/output/entry.txt"
+MAX_CHARS = 180
+OUTPUT_PATH = "/output/entry.txt"
 
 
-def check_entry(line):
-    """Accept exactly one non-blank line within the limit."""
+def validate(line):
+    """Check that the line is one excuse within the limit."""
     if not isinstance(line, str):
-        raise ValueError("entry must be text")
+        raise ValueError("excuse must be text")
     if not line or line != line.strip():
-        raise ValueError("entry must be a non-blank line")
+        raise ValueError("excuse must be a single non-blank line")
     if "\n" in line or "\r" in line:
-        raise ValueError("entry must fit on a single line")
-    if len(line) > LIMIT:
-        raise ValueError("entry is %d characters, over the %d limit" % (len(line), LIMIT))
-    return line
-
-
-def check_shape(line):
-    """The excuse must name production and the Friday it broke on."""
+        raise ValueError("excuse must not contain a line break")
+    if len(line) > MAX_CHARS:
+        raise ValueError(
+            "excuse is %d characters, over the %d limit" % (len(line), MAX_CHARS)
+        )
     if "production" not in line:
         raise ValueError("excuse must mention production")
     if "Friday" not in line:
-        raise ValueError("excuse must mention Friday")
+        raise ValueError("excuse must name the Friday it broke on")
     return line
 
 
-def write_entry(line):
-    """Print the line and store it in /output/entry.txt."""
+def store(line):
+    """Print the excuse and save it to the entry file."""
     print(line)
-    os.makedirs(os.path.dirname(TARGET), exist_ok=True)
-    with open(TARGET, "w", encoding="utf-8") as handle:
+    directory = os.path.dirname(OUTPUT_PATH)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as handle:
         handle.write(line + "\n")
 
 
-def run():
-    # Check before writing, so only a well-formed entry is stored.
-    write_entry(check_shape(check_entry(LINE)))
+def main():
+    # Validate first, so only a well-formed excuse is ever stored.
+    store(validate(LINE))
 
 
 if __name__ == "__main__":
-    run()
+    main()
